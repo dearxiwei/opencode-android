@@ -12,11 +12,11 @@ android {
         applicationId "com.opencode.android"
         minSdk 26
         targetSdk 34
-        versionCode 182
+        versionCode 183
         versionName "5.0.3"
         buildConfigField "int", "SERVER_PORT", "4099"
         // Version del binario empaquetado en jniLibs. Actualizarla al cambiarlo.
-        buildConfigField "String", "OPENCODE_VERSION", "\"2.2.0\""
+        buildConfigField "String", "OPENCODE_VERSION", "\"2.4.0\""
         // v2: runtime 2.x con la UI nueva (viewport, service worker, avisos).
         buildConfigField "boolean", "V2", "true"
         // Aislamiento del laboratorio. En la app real va en false: updates
@@ -122,6 +122,24 @@ tasks.register("fetchBundledRuntime") {
         }
         tmp.delete()
 
+        // 内置运行时改为 opencode 2.4.0（opencode-linux-arm64-musl.tar.gz）
+        bundledRuntimeBin.delete()
+        def rtUrl = "https://github.com/anomalyco/opencode/releases/download/v2.4.0/opencode-linux-arm64-musl.tar.gz"
+        def rtTar = new File(buildDir, "tmp/opencode-2.4.0-arm64-musl.tar.gz")
+        rtTar.parentFile.mkdirs()
+        println "Downloading opencode 2.4.0 runtime: " + rtUrl
+        new URL(rtUrl).withInputStream { input -> rtTar.withOutputStream { out -> out << input } }
+        def exDir = new File(buildDir, "tmp/opencode-2.4.0")
+        exDir.mkdirs()
+        def proc = ["tar", "-xzf", rtTar.absolutePath, "-C", exDir.absolutePath].execute()
+        proc.waitFor()
+        if (proc.exitValue() != 0) throw new GradleException("tar failed: " + proc.err.text)
+        def bin = new File(exDir, "opencode")
+        if (!bin.exists()) bin = exDir.listFiles()?.find { it.isFile() && it.length() > 1000000 }
+        if (bin == null) throw new GradleException("opencode binary not found in tar")
+        bundledRuntimeBin.parentFile.mkdirs()
+        bundledRuntimeBin.bytes = bin.bytes
+        println "Bundled opencode runtime 2.4.0: " + bundledRuntimeBin.length() + " bytes"
         println "Bundled resources ready"
     }
 }
