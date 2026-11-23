@@ -258,6 +258,25 @@ public class MainActivity extends AppCompatActivity {
     private android.content.BroadcastReceiver runtimeRestartReceiver = null;
 
     @Override
+    protected void attachBaseContext(Context base) {
+        Context ctx = base;
+        try {
+            String lang = base.getSharedPreferences("app", Context.MODE_PRIVATE)
+                    .getString("lang", "auto");
+            if (!"auto".equals(lang)) {
+                java.util.Locale loc = "zh".equals(lang) ? java.util.Locale.SIMPLIFIED_CHINESE
+                        : "es".equals(lang) ? new java.util.Locale("es")
+                        : java.util.Locale.ENGLISH;
+                android.content.res.Configuration c =
+                        new android.content.res.Configuration(base.getResources().getConfiguration());
+                c.setLocale(loc);
+                ctx = base.createConfigurationContext(c);
+            }
+        } catch (Throwable ignored) { }
+        super.attachBaseContext(ctx);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Inmersivo desde el primer fotograma: si las barras se ocultan despues,
@@ -630,7 +649,7 @@ public class MainActivity extends AppCompatActivity {
                     String html = injectEarlyScript(doc.html);
                     return htmlResponse(html, doc.csp);
                 } catch (Exception e) {
-                    log("early intercept: " + e);
+                    log(L("early intercept: ") + e);
                     return null;
                 }
             }
@@ -717,7 +736,7 @@ public class MainActivity extends AppCompatActivity {
                 setFullscreen(false);
                 txtStatus.setText(T("Servidor no responde: reintentando",
                         "Server not answering: retrying"));
-                log("WebView error (sin blanco): "
+                log(L("WebView error (sin blanco): ")
                         + (error == null ? "?" : String.valueOf(error.getDescription())));
                 if (chatOnly()) {
                     if (!splashDone) {
@@ -783,15 +802,15 @@ public class MainActivity extends AppCompatActivity {
                     // El Help de la web apunta al Discord de opencode (upstream):
                     // el soporte del launcher vive en nuestros issues.
                     target = Uri.parse("https://github.com/" + REPORT_REPO + "/issues");
-                    log("Help redirigido a issues del launcher");
+                    log(L("Help redirigido a issues del launcher"));
                 }
                 try {
                     Intent ext = new Intent(Intent.ACTION_VIEW, target);
                     ext.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     view.getContext().startActivity(ext);
-                    log("Abierta en navegador: " + u);
+                    log(L("Abierta en navegador: ") + u);
                 } catch (Exception e) {
-                    log("URL externa bloqueada (sin navegador): " + u);
+                    log(L("URL externa bloqueada (sin navegador): ") + u);
                 }
                 return true;
             }
@@ -931,7 +950,7 @@ public class MainActivity extends AppCompatActivity {
                     fileChooserLauncher.launch(Intent.createChooser(content, "Elegir archivo"));
                 } catch (Exception e) {
                     filePathCallback = null;
-                    log("Selector de archivos no disponible: " + e.getMessage());
+                    log(L("Selector de archivos no disponible: ") + e.getMessage());
                     return false;
                 }
                 return true;
@@ -1166,9 +1185,9 @@ public class MainActivity extends AppCompatActivity {
                     Uri.parse("package:" + getPackageName()));
             startActivity(i);
             snack(T("Activa el permiso y vuelve", "Enable the permission and come back"));
-            log("Activa: Permisos > Run commands in Termux environment. Luego vuelve y pulsa el boton grande.");
+            log(L("Activa: Permisos > Run commands in Termux environment. Luego vuelve y pulsa el boton grande."));
         } catch (Exception e) {
-            log("Abre manual: Ajustes > Apps > OpenCode Android > Permisos.");
+            log(L("Abre manual: Ajustes > Apps > OpenCode Android > Permisos."));
         }
     }
 
@@ -1220,13 +1239,13 @@ public class MainActivity extends AppCompatActivity {
     /** Reinicia el runtime embebido: detener y volver a arrancar. */
     private void restartServer() {
         setBusy(true);
-        log("Reiniciando servidor...");
+        log(L("Reiniciando servidor..."));
         new Thread(() -> {
             String out = stopRuntime();
             boolean gone = waitForPortGone(8000);
             runOnUiThread(() -> {
                 setBusy(false);
-                log("$ reiniciar (fase 1 detener):\n" + out
+                log(L("$ reiniciar (fase 1 detener):\n") + out
                         + (gone ? "\nDetenido, arrancando..." : "\nAviso: puerto seguia abierto, arranco igual..."));
                 startServerSequence();
             });
@@ -1236,7 +1255,7 @@ public class MainActivity extends AppCompatActivity {
     /** Detiene el runtime embebido. */
     private void stopServer() {
         setBusy(true);
-        log("Deteniendo servidor...");
+        log(L("Deteniendo servidor..."));
         new Thread(() -> {
             String out = stopRuntime();
             boolean open = !waitForPortGone(6000);
@@ -1247,7 +1266,7 @@ public class MainActivity extends AppCompatActivity {
                 setDot(open);
                 txtStatus.setText(open ? T("Servidor abierto (sigue vivo)", "Server open (still alive)")
                         : T("Servidor detenido", "Server stopped"));
-                log("$ detener\n" + out + (open ? "\nSIGUE ABIERTO" : "\nOK detenido"));
+                log(L("$ detener\n") + out + (open ? "\nSIGUE ABIERTO" : "\nOK detenido"));
                 snack(open ? T("Sigue abierto, mira el registro", "Still open, check the log")
                         : T("Servidor detenido", "Server stopped"));
                 if (!open && !chatOnly()) setFullscreen(false);
@@ -1285,11 +1304,10 @@ public class MainActivity extends AppCompatActivity {
                     .apply();
             LocalRuntime.stop();
             LocalServerService.start(this);
-            snack(T("Revertido a " + BuildConfig.OPENCODE_VERSION,
-                    "Reverted to " + BuildConfig.OPENCODE_VERSION));
-            log("Revertido opencode a la version incluida: " + BuildConfig.OPENCODE_VERSION);
+            snack(T("Revertido a ", "Reverted to ") + BuildConfig.OPENCODE_VERSION);
+            log(L("Revertido opencode a la version incluida: ") + BuildConfig.OPENCODE_VERSION);
         } catch (Exception e) {
-            log("No se pudo revertir: " + e.getMessage());
+            log(L("No se pudo revertir: ") + e.getMessage());
             snack(T("No se pudo revertir", "Could not revert"));
         }
     }
@@ -1311,7 +1329,7 @@ public class MainActivity extends AppCompatActivity {
             startForegroundService(i);
             snack(T("Actualizando opencode...", "Updating opencode..."));
         } catch (Exception e) {
-            log("No se pudo iniciar la actualizacion: " + e.getMessage());
+            log(L("No se pudo iniciar la actualizacion: ") + e.getMessage());
             snack(T("No se pudo iniciar la actualizacion", "Could not start the update"));
         }
     }
@@ -1361,7 +1379,7 @@ public class MainActivity extends AppCompatActivity {
         if (!appUpdatePending || appUpdUrl.isEmpty()) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 && !getPackageManager().canRequestPackageInstalls()) {
-            log("Permite 'instalar apps desconocidas' para esta app y vuelve a pulsar Descargar.");
+            log(L("Permite 'instalar apps desconocidas' para esta app y vuelve a pulsar Descargar."));
             snack(T("Permite instalar apps y repite", "Allow installing apps and retry"));
             openUnknownSourcesSettings();
             return;
@@ -1962,7 +1980,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
                             Uri.parse("package:" + getPackageName())));
                 } catch (Exception e) {
-                    log("Abre manual: Ajustes > Apps > OpenCode Android > Todos los archivos.");
+                    log(L("Abre manual: Ajustes > Apps > OpenCode Android > Todos los archivos."));
                 }
                 return;
             }
@@ -2578,7 +2596,7 @@ public class MainActivity extends AppCompatActivity {
         try (InputStream in = getAssets().open("oc-early.js")) {
             earlyScriptCache = readAll(in);
         } catch (Exception e) {
-            log("oc-early.js no disponible: " + e);
+            log(L("oc-early.js no disponible: ") + e);
             earlyScriptCache = "";
         }
         return earlyScriptCache;
@@ -2616,7 +2634,7 @@ public class MainActivity extends AppCompatActivity {
             return new IndexDoc(readAll(c.getInputStream()),
                     c.getHeaderField("Content-Security-Policy"));
         } catch (Exception e) {
-            log("early html: " + e);
+            log(L("early html: ") + e);
             return null;
         } finally {
             if (c != null) c.disconnect();
@@ -2724,7 +2742,7 @@ public class MainActivity extends AppCompatActivity {
             return new WebResourceResponse("application/json", "utf-8", 200, "OK", h,
                     new ByteArrayInputStream(obj.toString().getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
-            log("fs filter: " + e);
+            log(L("fs filter: ") + e);
             return null;
         } finally {
             if (c != null) c.disconnect();
@@ -2902,7 +2920,7 @@ public class MainActivity extends AppCompatActivity {
         try (InputStream in = getAssets().open("oc-v2.js")) {
             v2ShimCache = readAll(in);
         } catch (Exception e) {
-            log("oc-v2.js no disponible: " + e);
+            log(L("oc-v2.js no disponible: ") + e);
             v2ShimCache = "";
         }
         return v2ShimCache;
@@ -3075,7 +3093,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
             } catch (Exception e) {
-                log("Abre manual: Ajustes > Seguridad > Bloqueo de pantalla.");
+                log(L("Abre manual: Ajustes > Seguridad > Bloqueo de pantalla."));
             }
             return;
         }
@@ -3089,7 +3107,7 @@ public class MainActivity extends AppCompatActivity {
             pendingUnlock = after;
             lockLauncher.launch(auth);
         } catch (Exception e) {
-            log("Bloqueo no disponible, entro igual: " + e.getMessage());
+            log(L("Bloqueo no disponible, entro igual: ") + e.getMessage());
             after.run();
         }
     }
@@ -3114,13 +3132,13 @@ public class MainActivity extends AppCompatActivity {
                         // ciegas, la tira de puntos dice que falta.
                         txtStatus.setText(T("Faltan pasos: completa los puntos",
                                 "Steps missing: complete the dots"));
-                        log("Abrir chat: aun faltan pasos del primer arranque."
+                        log(L("Abrir chat: aun faltan pasos del primer arranque.")
                                 + " Completa la lista de puntos y pulsa Iniciar.");
                         setBusy(false);
                         return;
                     }
                     txtStatus.setText(T("Servidor parado: arrancando", "Server stopped: starting"));
-                    log("Abrir chat con servidor parado: arranco solo.");
+                    log(L("Abrir chat con servidor parado: arranco solo."));
                     btnStart.performClick();
                     setBusy(false);
                 });
@@ -3132,7 +3150,7 @@ public class MainActivity extends AppCompatActivity {
                 final int s = waited + 5;
                 runOnUiThread(() -> {
                     if (gen == openGen) txtStatus.setText(
-                            T("Esperando respuesta " + s + "s", "Waiting for answer " + s + "s"));
+                            T("Esperando respuesta ", "Waiting for answer ") + s + "s");
                 });
             }
             if (gen != openGen || isFinishing()) return;
@@ -3151,12 +3169,12 @@ public class MainActivity extends AppCompatActivity {
                     // (escucha pero no responde). Reinicio solo, sin pedir nada.
                     txtStatus.setText(T("Servidor colgado: reiniciando solo",
                             "Hung server: restarting alone"));
-                    log("Puerto abierto sin HTTP 200 en 60s: servidor colgado,"
+                    log(L("Puerto abierto sin HTTP 200 en 60s: servidor colgado,")
                             + " reinicio solo (equivale a Reiniciar).");
                     snack(T("Servidor colgado, reiniciando", "Hung server, restarting"));
                     restartServer();
                 } else {
-                    log("Chat sin HTTP 200 en 60s: no abro (evita blanco)."
+                    log(L("Chat sin HTTP 200 en 60s: no abro (evita blanco).")
                             + " Reintento automatico.");
                     startupFailed(T("Sin respuesta del servidor. Reintentando...",
                             "No answer from the server. Retrying..."));
@@ -3175,33 +3193,70 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /** Idioma: automatico (idioma del movil) salvo override manual ES/EN. */
+    private String langPref() {
+        return getSharedPreferences("app", MODE_PRIVATE).getString("lang", "auto");
+    }
+
+    private boolean useZh() {
+        String l = langPref();
+        if ("zh".equals(l)) return true;
+        if ("es".equals(l) || "en".equals(l)) return false;
+        String dl = java.util.Locale.getDefault().getLanguage();
+        return dl != null && dl.startsWith("zh");
+    }
+
     private boolean useEn() {
-        String l = getSharedPreferences("app", MODE_PRIVATE).getString("lang", "auto");
+        String l = langPref();
         if ("es".equals(l)) return false;
         if ("en".equals(l)) return true;
+        if (useZh()) return false;
         String dl = java.util.Locale.getDefault().getLanguage();
         return dl == null || !dl.startsWith("es");
     }
-    private String T(String es, String en) { return useEn() ? en : es; }
-    private void toggleLang() {
-        boolean nowEn = !useEn();
-        getSharedPreferences("app", MODE_PRIVATE).edit().putString("lang", nowEn ? "en" : "es").apply();
-        android.widget.TextView l = findViewById(R.id.txtLog);
-        String ls = (l == null) ? "" : l.getText().toString();
-        snack(nowEn ? "Language: English" : "Idioma: espaol");
-        applyLang();
-        // No restaurar el texto inicial en el idioma viejo; lo demas se conserva.
-        String es0 = "Listo. Pulsa Iniciar y abrir.", en0 = "Ready. Press Start and open.";
-        android.widget.TextView l2 = findViewById(R.id.txtLog);
-        if (l2 != null && !ls.isEmpty() && !ls.equals(es0) && !ls.equals(en0)) l2.setText(ls);
-        checkStatus(false);
+
+    private String T(String es, String en) {
+        if (useZh()) {
+            String z = I18n.zh(en);
+            return z != null ? z : en;
+        }
+        return useEn() ? en : es;
     }
+
+    private String langLabel() {
+        if (useZh()) return "中文";
+        return useEn() ? "English" : "Español";
+    }
+
+    private void showLangDialog() {
+        final String[] labels = {"跟随系统 / Auto", "中文", "English", "Español"};
+        final String[] vals = {"auto", "zh", "en", "es"};
+        int cur = 0;
+        String l = langPref();
+        for (int i = 0; i < vals.length; i++) if (vals[i].equals(l)) cur = i;
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("语言 / Language / Idioma")
+                .setSingleChoiceItems(labels, cur, (d, w) -> {
+                    getSharedPreferences("app", MODE_PRIVATE).edit()
+                            .putString("lang", vals[w]).apply();
+                    d.dismiss();
+                    recreate();
+                })
+                .setNegativeButton(T("Cancelar", "Cancel"), null)
+                .show();
+    }
+
+    private String L(String es) {
+        if (!useZh()) return es;
+        String z = I18n.esZh(es);
+        return z != null ? z : es;
+    }
+    private void toggleLang() { showLangDialog(); }
     /** Repinta todos los textos visibles de la app en el idioma actual. */
     private void applyLang() {
         com.google.android.material.appbar.MaterialToolbar tb = findViewById(R.id.toolbar);
         if (tb != null && tb.getMenu() != null) {
             if (tb.getMenu().findItem(R.id.action_lang) != null)
-                tb.getMenu().findItem(R.id.action_lang).setTitle("ES/EN");
+                tb.getMenu().findItem(R.id.action_lang).setTitle(langLabel());
             if (tb.getMenu().findItem(R.id.action_controls) != null)
                 tb.getMenu().findItem(R.id.action_controls).setTitle(T("Controles", "Controls"));
         }
@@ -3262,7 +3317,7 @@ public class MainActivity extends AppCompatActivity {
         if (pendingShare != null || shareFlowActive) return;
 
         String version = versionLabel();
-        String[] lines = Changelog.forVersion(version, useEn());
+        String[] lines = Changelog.forVersion(version, useEn(), useZh());
         StringBuilder msg = new StringBuilder();
         for (String line : lines) {
             if (msg.length() > 0) msg.append('\n').append('\n');
@@ -3489,7 +3544,7 @@ public class MainActivity extends AppCompatActivity {
                 refreshUpdateBtn();
                 maybeNotifyOpencode(pending, updInstalled, updLatest);
                 synchronized (updDbg) {
-                    log("Update-check: " + updDbg + " inst=[" + updInstalled
+                    log(L("Update-check: ") + updDbg + " inst=[" + updInstalled
                             + "] latest=[" + updLatest + "] pendiente=" + pending);
                     // Espejo a /sdcard para depurar por adb (mismo patron que update.progress).
                     try {
@@ -3707,7 +3762,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 notifPermLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
             } catch (Exception e) {
-                log("Avisos: concede notificaciones a mano o el viga no podr avisar.");
+                log(L("Avisos: concede notificaciones a mano o el viga no podr avisar."));
             }
         }
     }
@@ -4029,7 +4084,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
                             } catch (Exception e) {
-                                log("Abre manual: Ajustes > Seguridad > Bloqueo de pantalla.");
+                                log(L("Abre manual: Ajustes > Seguridad > Bloqueo de pantalla."));
                             }
                             return;
                         }
@@ -4237,7 +4292,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
                     Uri.parse("package:" + getPackageName())));
         } catch (Exception e) {
-            log("Abre manual: Ajustes > Apps > OpenCode Android > Todos los archivos.");
+            log(L("Abre manual: Ajustes > Apps > OpenCode Android > Todos los archivos."));
         }
     }
     /** Punto rojo (falta) / verde (hecho). Solo estado: sin botones. */
@@ -4467,7 +4522,7 @@ private void refreshUpdateBtn() {
         if (notifDialogPending()) return;
         filesPermTried = true;
         filesAskPending = true;
-        log("Abro Ajustes: esta app necesita 'todos los archivos' para que el agente"
+        log(L("Abro Ajustes: esta app necesita 'todos los archivos' para que el agente")
                 + " lea y escriba tus archivos. Activa el interruptor y vuelve.");
         openAllFilesSettings();
     }
@@ -4599,7 +4654,7 @@ private void refreshAppUpdateBtn() {
                                                 == android.app.DownloadManager.STATUS_SUCCESSFUL) {
                                     installAppUpdate();
                                 } else {
-                                    log("Descarga de la app incompleta o fallida. Reintenta.");
+                                    log(L("Descarga de la app incompleta o fallida. Reintenta."));
                                     snack(T("Fallo la descarga, reintenta",
                                             "Download failed, retry"));
                                 }
@@ -4611,12 +4666,12 @@ private void refreshAppUpdateBtn() {
                             ContextCompat.RECEIVER_NOT_EXPORTED);
                 }
                 runOnUiThread(() -> {
-                    log("Descargando nueva versin " + tag + " ...");
+                    log(L("Descargando nueva versin ") + tag + " ...");
                     snack(T("Descargando nueva versin...", "Downloading new version..."));
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
-                    log("Descarga de la app fall: " + e.getMessage());
+                    log(L("Descarga de la app fall: ") + e.getMessage());
                     snack(T("Fallo la descarga, mira el registro",
                             "Download failed, check the log"));
                 });
@@ -4685,7 +4740,7 @@ private void refreshAppUpdateBtn() {
                 snack(T("Activa 'Instalar apps desconocidas' y vuelve",
                         "Enable 'Install unknown apps' and come back"));
             } catch (Exception e2) {
-                log("Abre manual: Ajustes > Apps > OpenCode Android > Instalar apps desconocidas.");
+                log(L("Abre manual: Ajustes > Apps > OpenCode Android > Instalar apps desconocidas."));
             }
         }
     }
@@ -4701,10 +4756,10 @@ private void refreshAppUpdateBtn() {
             in.setDataAndType(uri, "application/vnd.android.package-archive");
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(in);
-            log("Instalador abierto: confirma Instalar.");
+            log(L("Instalador abierto: confirma Instalar."));
             snack(T("Confirma la instalacin", "Confirm the install"));
         } catch (Exception e) {
-            log("No se pudo abrir el instalador: " + e.getMessage());
+            log(L("No se pudo abrir el instalador: ") + e.getMessage());
             snack(T("Fallo el instalador, mira el registro", "Installer failed, check the log"));
         }
     }
@@ -5268,7 +5323,7 @@ private void refreshAppUpdateBtn() {
                     updating = false;
                     progress.setIndeterminate(true);
                     progress.setVisibility(View.GONE);
-                    log("Progreso: timeout 30min, revisa Termux manual.");
+                    log(L("Progreso: timeout 30min, revisa Termux manual."));
                     snack(T("Timeout de progreso", "Progress timeout"));
                     return;
                 }
@@ -5287,7 +5342,7 @@ private void refreshAppUpdateBtn() {
                                 int pct = (int) Math.min(100, Math.max(0, down * 100 / tot));
                                 if (pct / 10 != lastMbQ) {
                                     lastMbQ = pct / 10;
-                                    log("Progreso descarga " + down + "/" + tot + " MB (" + pct + "%)");
+                                    log(L("Progreso descarga ") + down + "/" + tot + " MB (" + pct + "%)");
                                 }
                                 lastStage = stage;
                                 progress.setIndeterminate(false);
@@ -5322,16 +5377,16 @@ private void refreshAppUpdateBtn() {
                                         .putString("upd_installed", updInstalled)
                                         .putBoolean("upd_pending", false).apply();
                                 refreshUpdateBtn();
-                                log("Actualizacion instalada: reinicio el servidor para aplicarla.");
+                                log(L("Actualizacion instalada: reinicio el servidor para aplicarla."));
                                 snack(T("Actualizacion terminada, reiniciando",
                                         "Update finished, restarting"));
                                 finishUpdateFlow();
                             } else {
                                 // Fallo (o sin codigo): no reiniciar a ciegas con un
                                 // binario a medias; el boton sigue y se puede reintentar.
-                                log("Update termino con EXIT:" + ec + ": no reinicio, revisa Termux y vuelve a pulsar Actualizar.");
-                                snack(T("Termin con errores (EXIT:" + ec + "), no se reinicia: reintenta",
-                                        "Finished with errors (EXIT:" + ec + "), not restarting: retry"));
+                                log(L("Update termino con EXIT:") + ec + ": no reinicio, revisa Termux y vuelve a pulsar Actualizar.");
+                                snack(T("Termin con errores (EXIT:", "Finished with errors (EXIT:") + ec
+                                        + T("), no se reinicia: reintenta", "), not restarting: retry"));
                                 updating = false;
                                 progress.setIndeterminate(true);
                                 progress.setVisibility(View.GONE);
@@ -5343,7 +5398,7 @@ private void refreshAppUpdateBtn() {
                     }
                     if (stage != lastStage) {
                         lastStage = stage;
-                        log("Progreso " + stage + "%: " + text);
+                        log(L("Progreso ") + stage + "%: " + text);
                     }
                     if (stage < 100) {
                         progress.setIndeterminate(false);
@@ -5372,7 +5427,7 @@ private void refreshAppUpdateBtn() {
                     // Sin marcador 16 min  instalador agotado (timeout 900):
                     // cerrar por verdad de version (reinicia y reevalua).
                     if (elapsed > 16 * 60 * 1000) {
-                        log("Actualizacion sin marcador 16min: reinicio y reevaluo por version.");
+                        log(L("Actualizacion sin marcador 16min: reinicio y reevaluo por version."));
                         snack(T("Revisando version instalada", "Checking installed version"));
                         finishUpdateFlow();
                         return;
@@ -5541,7 +5596,7 @@ private void refreshAppUpdateBtn() {
             runOnUiThread(() -> {
                 snack(T("Descargado: ", "Downloaded: ") + savedName
                         + T(" (", " (") + (size / 1024) + " KB)");
-                log("Descarga guardada: " + saved);
+                log(L("Descarga guardada: ") + saved);
             });
         } catch (Exception e) {
             Log.d("OpenCode", "no se pudo guardar la descarga: " + e);
@@ -5611,7 +5666,7 @@ private void refreshAppUpdateBtn() {
             long id = dm.enqueue(req);
             snack(T("Descargando ", "Downloading ") + name
                     + T("", ""));
-            log("Descarga: " + name + " <- " + (local ? "servidor local" : "web"));
+            log(L("Descarga: ") + name + " <- " + (local ? "servidor local" : "web"));
             // Se avisa al terminar, para saber si salio bien.
             watchDownload(id, name);
         } catch (Exception e) {
@@ -5665,7 +5720,7 @@ private void refreshAppUpdateBtn() {
                         final String msg = T("Descargado: ", "Downloaded: ") + name
                                 + T(" (Descargas/opencode)", " (Downloads/opencode)");
                         runOnUiThread(() -> snack(msg));
-                        log("Descarga terminada: " + name);
+                        log(L("Descarga terminada: ") + name);
                         c.close();
                         return;
                     }
@@ -5675,7 +5730,7 @@ private void refreshAppUpdateBtn() {
                                         android.app.DownloadManager.COLUMN_REASON)));
                         runOnUiThread(() -> snack(T("Fall la descarga: ", "Download failed: ")
                                 + reason));
-                        log("Descarga fallida: " + name + " (" + reason + ")");
+                        log(L("Descarga fallida: ") + name + " (" + reason + ")");
                         c.close();
                         return;
                     }

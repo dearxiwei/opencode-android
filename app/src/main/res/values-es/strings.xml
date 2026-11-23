@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenCode Android</string>
+    <string name="splash_title">OpenCode Android</string>
+    <string name="log_title">Registro</string>
+    <string name="clear">Limpiar</string>
+    <string name="server_q">Servidor ?</string>
+    <string name="start_open">Iniciar y abrir</string>
+    <string name="open_chat">Abrir chat</string>
+    <string name="restart">Reiniciar</string>
+    <string name="stop">Detener</string>
+    <string name="copy">Copiar</string>
+    <string name="ready_hint">Listo. Pulsa Iniciar y abrir.</string>
+    <string name="splash_starting">Iniciando…</string>
+    <string name="retry">Reintentar</string>
+    <string name="controls">Controles</string>
+    <string name="opencode">OpenCode</string>
+    <string name="send_to">Enviar a</string>
+    <string name="choose_conversation">Elige una conversación nueva o existente</string>
+    <string name="cancel">Cancelar</string>
+    <string name="share_with_opencode">Compartir con opencode</string>
+    <string name="choose_send">Elige dónde enviarlo</string>
+    <string name="new_session">Nueva sesión</string>
+    <string name="created_on_send">Se creará al enviar</string>
+    <string name="send">Enviar</string>
+    <string name="files_copied_note">Los archivos se copian a Descargas/opencode-shares</string>
+    <string name="lang_label">Idioma</string>
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenCode Android</string>
+    <string name="splash_title">OpenCode Android</string>
+    <string name="log_title">日志</string>
+    <string name="clear">清空</string>
+    <string name="server_q">服务器 ?</string>
+    <string name="start_open">启动并打开</string>
+    <string name="open_chat">打开对话</string>
+    <string name="restart">重启</string>
+    <string name="stop">停止</string>
+    <string name="copy">复制</string>
+    <string name="ready_hint">就绪。点「启动并打开」。</string>
+    <string name="splash_starting">正在启动…</string>
+    <string name="retry">重试</string>
+    <string name="controls">控制</string>
+    <string name="opencode">OpenCode</string>
+    <string name="send_to">发送到</string>
+    <string name="choose_conversation">选择新建或已有对话</string>
+    <string name="cancel">取消</string>
+    <string name="share_with_opencode">分享到 opencode</string>
+    <string name="choose_send">选择发送位置</string>
+    <string name="new_session">新会话</string>
+    <string name="created_on_send">发送时创建</string>
+    <string name="send">发送</string>
+    <string name="files_copied_note">文件会复制到「下载/opencode-shares」</string>
+    <string name="lang_label">语言</string>
+</resources>

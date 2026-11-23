@@ -12,7 +12,7 @@ android {
         applicationId "com.opencode.android"
         minSdk 26
         targetSdk 34
-        versionCode 178
+        versionCode 182
         versionName "5.0.3"
         buildConfigField "int", "SERVER_PORT", "4099"
         // Version del binario empaquetado en jniLibs. Actualizarla al cambiarlo.
@@ -40,6 +40,7 @@ android {
                 storePassword keystoreProps['storePassword']
                 keyAlias keystoreProps['keyAlias']
                 keyPassword keystoreProps['keyPassword']
+                storeType keystoreProps['storeType'] ?: 'PKCS12'
             }
         }
     }
@@ -80,6 +81,53 @@ android {
             keepDebugSymbols += ['**/*.so']
         }
     }
+}
+
+// 官方发布包里的工具链(.deb)和 opencode 运行时二进制不在仓库里（见 .gitignore）：
+// 构建前从官方 v5.0.3 APK 中取出，避免打出的 APK 缺少资源导致首次启动卡在安装工具链。
+def bundledToolboxDir = file("$projectDir/src/main/assets/toolbox")
+def bundledRuntimeBin = file("$projectDir/src/main/jniLibs/arm64-v8a/libopencode2_bin.so")
+
+tasks.register("fetchBundledRuntime") {
+    outputs.dir(bundledToolboxDir)
+    outputs.file(bundledRuntimeBin)
+    doLast {
+        if (bundledRuntimeBin.exists() && bundledToolboxDir.exists()
+                && (bundledToolboxDir.listFiles()?.length ?: 0) > 0) {
+            println "bundled runtime/toolbox already present, skip download"
+            return
+        }
+        def url = "https://github.com/Dajeovv/opencode-android/releases/download/v5.0.3/OpenCodeAndroid-v5.0.3.apk"
+        def tmp = new File(buildDir, "tmp/upstream-v5.0.3.apk")
+        tmp.parentFile.mkdirs()
+        println "Downloading upstream APK: " + url
+        new URL(url).withInputStream { input -> tmp.withOutputStream { out -> out << input } }
+        println "Extracting toolbox + runtime from upstream APK"
+        def zip = new java.util.zip.ZipFile(tmp)
+        try {
+            zip.entries().each { e ->
+                def name = e.name
+                if (name.startsWith("assets/toolbox/")) {
+                    def out = new File(bundledToolboxDir, name.substring("assets/toolbox/".length()))
+                    if (out.isDirectory()) return
+                    out.parentFile.mkdirs()
+                    zip.getInputStream(e).withStream { input -> out.withOutputStream { o -> o << input } }
+                } else if (name == "lib/arm64-v8a/libopencode2_bin.so") {
+                    bundledRuntimeBin.parentFile.mkdirs()
+                    zip.getInputStream(e).withStream { input -> bundledRuntimeBin.withOutputStream { o -> o << input } }
+                }
+            }
+        } finally {
+            zip.close()
+        }
+        tmp.delete()
+
+        println "Bundled resources ready"
+    }
+}
+
+tasks.configureEach { t ->
+    if (t.name == "preBuild") t.dependsOn("fetchBundledRuntime")
 }
 
 dependencies {

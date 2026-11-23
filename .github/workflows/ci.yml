@@ -3,11 +3,17 @@ name: CI
 on:
   push:
     branches: [main]
-  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      APP_VERSION: 5.0.3-zh.3
+      OPENCODE_VERSION: 2.2.0
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -18,5 +24,32 @@ jobs:
       - uses: android-actions/setup-android@v4
       - name: Ensure gradlew is executable
         run: chmod +x gradlew
-      - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Restore release keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > release.p12
+          cat > keystore.properties <<PROPS
+          storeFile=release.p12
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          storeType=PKCS12
+          PROPS
+      - name: Build release APK
+        run: ./gradlew :app:assembleRelease --no-daemon
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/*.apk "OpenCodeAndroid-v${APP_VERSION}.apk"
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opencode-android-release
+          path: app/build/outputs/apk/release/*.apk
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.APP_VERSION }}
+          name: OpenCode Android v${{ env.APP_VERSION }} 简体中文版
+          body: |
+            内置 opencode ${{ env.OPENCODE_VERSION }} 运行时，完整简体中文界面。
+            语言可切换：跟随系统 / 中文 / English / Español。
+            安装前请先卸载官方版（签名不同）。
+          files: OpenCodeAndroid-v${{ env.APP_VERSION }}.apk

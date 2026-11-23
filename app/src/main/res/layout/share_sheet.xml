@@ -46,7 +46,7 @@
                 android:id="@+id/shareTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Compartir con opencode"
+                android:text="@string/share_with_opencode"
                 android:textAppearance="?attr/textAppearanceTitleLarge"
                 android:textColor="?attr/colorOnSurface" />
 
@@ -55,7 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Elige dónde enviarlo"
+                android:text="@string/choose_send"
                 android:textAppearance="?attr/textAppearanceBodySmall"
                 android:textColor="?attr/colorOnSurfaceVariant" />
         </LinearLayout>
@@ -90,7 +90,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="6dp"
-        android:text="Enviar a"
+        android:text="@string/send_to"
         android:textAppearance="?attr/textAppearanceLabelLarge"
         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -135,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Nueva sesión"
+                    android:text="@string/new_session"
                     android:textAppearance="?attr/textAppearanceBodyLarge"
                     android:textColor="?attr/colorOnSurface" />
 
@@ -146,7 +146,7 @@
                     android:layout_marginTop="1dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Se creará al enviar"
+                    android:text="@string/created_on_send"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
@@ -183,7 +183,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:minHeight="56dp"
-        android:text="Enviar"
+        android:text="@string/send"
         app:icon="@drawable/ic_send"
         app:iconGravity="textStart"
         app:iconPadding="10dp" />
@@ -195,7 +195,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:minHeight="44dp"
-        android:text="Cancelar" />
+        android:text="@string/cancel" />
 
     <TextView
         android:id="@+id/shareFootnote"
@@ -203,7 +203,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:gravity="center"
-        android:text="Los archivos se copian a Descargas/opencode-shares"
+        android:text="@string/files_copied_note"
         android:textAppearance="?attr/textAppearanceBodySmall"
         android:textColor="?attr/colorOnSurfaceVariant" />
 </LinearLayout>

@@ -61,13 +61,17 @@ public class ServerWatch {
 
     /** ES/EN fuera de la actividad (los receptores no tienen T()). */
     public static String t(Context c, String es, String en) {
-        try {
-            String l = p(c).getString("lang", "auto");
-            if ("es".equals(l)) return es;
-            if ("en".equals(l)) return en;
-        } catch (Exception ignored) {
-        }
+        String l = null;
+        try { l = p(c).getString("lang", "auto"); } catch (Exception ignored) { }
         String dl = java.util.Locale.getDefault().getLanguage();
+        boolean zh = "zh".equals(l) || (!"es".equals(l) && !"en".equals(l)
+                && dl != null && dl.startsWith("zh"));
+        if (zh) {
+            String z = I18n.zh(en);
+            return z != null ? z : en;
+        }
+        if ("es".equals(l)) return es;
+        if ("en".equals(l)) return en;
         return (dl != null && dl.startsWith("es")) ? es : en;
     }
 

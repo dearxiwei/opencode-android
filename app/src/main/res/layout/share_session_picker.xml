@@ -21,7 +21,7 @@
         android:id="@+id/sharePickerTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enviar a"
+        android:text="@string/send_to"
         android:textAppearance="?attr/textAppearanceTitleLarge"
         android:textColor="?attr/colorOnSurface" />
 
@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Elige una conversación nueva o existente"
+        android:text="@string/choose_conversation"
         android:textAppearance="?attr/textAppearanceBodySmall"
         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -55,5 +55,5 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:minHeight="44dp"
-        android:text="Cancelar" />
+        android:text="@string/cancel" />
 </LinearLayout>

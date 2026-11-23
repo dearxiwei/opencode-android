@@ -68,7 +68,7 @@
                     android:id="@+id/txtStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                        android:text="Servidor ?"
+                        android:text="@string/server_q"
                     android:textAppearance="?attr/textAppearanceTitleMedium" />
             </LinearLayout>
         </LinearLayout>
@@ -79,7 +79,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:minHeight="56dp"
-            android:text="Iniciar y abrir"
+            android:text="@string/start_open"
             app:icon="@android:drawable/ic_media_play" />
 
                 <com.google.android.material.button.MaterialButton
@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:minHeight="56dp"
-            android:text="Abrir chat"
+            android:text="@string/open_chat"
             android:visibility="gone"
             app:icon="@android:drawable/ic_menu_view" />
 
@@ -106,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:minHeight="48dp"
-                android:text="Reiniciar"
+                android:text="@string/restart"
                 app:icon="@android:drawable/ic_popup_sync" />
 
             <com.google.android.material.button.MaterialButton
@@ -116,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:minHeight="48dp"
-                android:text="Detener"
+                android:text="@string/stop"
                 app:icon="@android:drawable/ic_menu_close_clear_cancel" />
 
                                                                                     <com.google.android.material.card.MaterialCardView
@@ -163,7 +163,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:minHeight="48dp"
-                            android:text="Copiar" />
+                            android:text="@string/copy" />
                     </LinearLayout>
 
                     <ScrollView
@@ -177,7 +177,7 @@
                             android:layout_height="wrap_content"
                             android:typeface="monospace"
                             android:textSize="12sp"
-                            android:text="Listo. Pulsa Iniciar y abrir." />
+                            android:text="@string/ready_hint" />
                     </ScrollView>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -208,7 +208,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:visibility="gone"
-        android:contentDescription="Controles"
+        android:contentDescription="@string/controls"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/ic_menu_manage" />
 
@@ -257,7 +257,7 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:src="@drawable/ic_logo"
-                android:contentDescription="OpenCode" />
+                android:contentDescription="@string/opencode" />
 
             <TextView
                 android:id="@+id/splashTitle"
@@ -307,7 +307,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Iniciando…"
+                android:text="@string/splash_starting"
                 android:textAppearance="?attr/textAppearanceBodySmall"
                 android:textColor="@color/splash_sub" />
 
@@ -318,7 +318,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:minHeight="44dp"
-                android:text="Reintentar"
+                android:text="@string/retry"
                 android:visibility="gone" />
         </LinearLayout>
     </FrameLayout>

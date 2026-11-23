@@ -13,6 +13,11 @@ final class Changelog {
     }
 
     static String[] forVersion(String version, boolean en) {
+        return forVersion(version, en, false);
+    }
+
+    static String[] forVersion(String version, boolean en, boolean zh) {
+        if (zh) return "5.0.3".equals(version) ? ZH_503 : ZH_GENERIC;
         if ("5.0.3".equals(version)) return en ? EN_503 : ES_503;
         return en ? EN_GENERIC : ES_GENERIC;
     }
@@ -63,6 +68,24 @@ final class Changelog {
             "The server password is no longer exposed in the agent's shell.",
             "Built-in WARP: opencode.ai traffic can go out over "
                     + "Cloudflare, toggle it from the controls menu."
+    };
+
+    private static final String[] ZH_503 = new String[]{
+            "内置 opencode 终端已可用：打开「更多…」> 终端并点 +。",
+            "可直接在手机上执行命令；退出 shell 时标签页会自动关闭。",
+            "终端运行在工具箱环境中：pkg、apt、git、python 与 Termux 一致。",
+            "可在对话中打开应用、链接和文件，也支持按名称（例如「打开微信」）。",
+            "可从智能体安装 APK：使用系统安装器，或在有 root 时静默安装。",
+            "一步完成安装并打开应用，并说明安装方式。",
+            "原生 shell 工具更快，不再依赖 proot 沙箱；pip 响应也更快。",
+            "状态栏始终可见，页面紧贴其下方显示。",
+            "智能体已知 opencode 版本，不再因 pm、am 或无输出命令浪费回合。",
+            "服务器密码不再暴露在智能体的 shell 中。",
+            "内置 WARP：opencode.ai 流量可经 Cloudflare 发出，可在控制菜单开关。"
+    };
+
+    private static final String[] ZH_GENERIC = new String[]{
+            "问题修复与性能改进。"
     };
 
     private static final String[] ES_GENERIC = new String[]{
